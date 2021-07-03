@@ -4,6 +4,7 @@ import (
 	"context"
 	"tape/e2e/mock"
 	"tape/pkg/infra"
+	"tape/pkg/infra/basic"
 
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/mocks"
@@ -25,7 +26,7 @@ var _ = Describe("Proposer", func() {
 
 	Context("CreateProposer", func() {
 		It("successfully creates a proposer", func() {
-			dummy := infra.Node{
+			dummy := basic.Node{
 				Addr: addr,
 			}
 			Proposer, err := infra.CreateProposer(dummy, logger)
@@ -34,7 +35,7 @@ var _ = Describe("Proposer", func() {
 		})
 
 		It("handle error ", func() {
-			dummy := infra.Node{
+			dummy := basic.Node{
 				Addr: "invalid_addr",
 			}
 			_, err := infra.CreateProposer(dummy, logger)
@@ -44,7 +45,7 @@ var _ = Describe("Proposer", func() {
 
 	Context("CreateBroadcasters", func() {
 		It("successfully creates a broadcaster", func() {
-			dummy := infra.Node{
+			dummy := basic.Node{
 				Addr: addr,
 			}
 			Broadcaster, err := infra.CreateBroadcaster(context.Background(), dummy, logger)
@@ -53,7 +54,7 @@ var _ = Describe("Proposer", func() {
 		})
 
 		It("captures connection errors", func() {
-			dummy := infra.Node{
+			dummy := basic.Node{
 				Addr: "invalid_addr",
 			}
 			_, err := infra.CreateBroadcaster(context.Background(), dummy, logger)

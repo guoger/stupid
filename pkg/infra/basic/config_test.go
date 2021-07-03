@@ -1,11 +1,11 @@
-package infra_test
+package basic_test
 
 import (
 	"io/ioutil"
 	"os"
 	"text/template"
 
-	"tape/pkg/infra"
+	"tape/pkg/infra/basic"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -75,16 +75,16 @@ var _ = Describe("Config", func() {
 
 			generateConfigFile(f.Name(), struct{ TlsFile string }{tlsFile.Name()})
 
-			c, err := infra.LoadConfig(f.Name())
+			c, err := basic.LoadConfig(f.Name())
 			Expect(err).NotTo(HaveOccurred())
-			Expect(c).To(Equal(infra.Config{
-				Endorsers: []infra.Node{
+			Expect(c).To(Equal(basic.Config{
+				Endorsers: []basic.Node{
 					{Addr: "peer0.org1.example.com:7051", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")},
 					{Addr: "peer0.org2.example.com:7051", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")},
 				},
-				Committers:      []infra.Node{{Addr: "peer0.org2.example.com:7051", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")}},
+				Committers:      []basic.Node{{Addr: "peer0.org2.example.com:7051", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")}},
 				CommitThreshold: 1,
-				Orderer:         infra.Node{Addr: "orderer.example.com:7050", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")},
+				Orderer:         basic.Node{Addr: "orderer.example.com:7050", TLSCACert: tlsFile.Name(), TLSCACertByte: []byte("a")},
 				Channel:         "mychannel",
 				Chaincode:       "mycc",
 				Version:         "",
@@ -102,7 +102,7 @@ var _ = Describe("Config", func() {
 
 	Context("bad", func() {
 		It("fails to load missing config file", func() {
-			_, err := infra.LoadConfig("invalid_file")
+			_, err := basic.LoadConfig("invalid_file")
 			Expect(err).Should(MatchError(ContainSubstring("invalid_file")))
 		})
 
@@ -113,7 +113,7 @@ var _ = Describe("Config", func() {
 
 			generateConfigFile(f.Name(), struct{ TlsFile string }{"invalid_file"})
 
-			_, err := infra.LoadConfig(f.Name())
+			_, err := basic.LoadConfig(f.Name())
 			Expect(err).Should(MatchError(ContainSubstring("invalid_file")))
 		})
 	})
