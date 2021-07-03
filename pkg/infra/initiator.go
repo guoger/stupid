@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"tape/pkg/infra/basic"
 
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
@@ -11,7 +12,7 @@ type Initiator struct {
 	Num     int
 	Burst   int
 	R       float64
-	Config  Config
+	Config  basic.Config
 	Crypto  Crypto
 	Raw     chan *Elements
 	ErrorCh chan error

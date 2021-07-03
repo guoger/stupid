@@ -7,6 +7,7 @@ import (
 	"tape/e2e"
 	"tape/e2e/mock"
 	"tape/pkg/infra"
+	"tape/pkg/infra/basic"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -64,7 +65,7 @@ var _ = Describe("Observer", func() {
 			CommitThreshold: 1,
 		}
 		e2e.GenerateConfigFile(configFile.Name(), configValue)
-		config, err := infra.LoadConfig(configFile.Name())
+		config, err := basic.LoadConfig(configFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
@@ -124,7 +125,7 @@ var _ = Describe("Observer", func() {
 			CommitThreshold: CommitThreshold,
 		}
 		e2e.GenerateConfigFile(configFile.Name(), configValue)
-		config, err := infra.LoadConfig(configFile.Name())
+		config, err := basic.LoadConfig(configFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())

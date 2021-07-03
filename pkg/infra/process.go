@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"fmt"
+	"tape/pkg/infra/basic"
 	"time"
 
 	"github.com/pkg/errors"
@@ -11,7 +12,7 @@ import (
 
 func Process(configPath string, num int, burst int, rate float64, logger *log.Logger) error {
 	/*** variables ***/
-	config, err := LoadConfig(configPath)
+	config, err := basic.LoadConfig(configPath)
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 
 	"tape/e2e"
 	"tape/pkg/infra"
+	"tape/pkg/infra/basic"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -58,7 +59,7 @@ var _ = Describe("Initiator", func() {
 		defer close(raw)
 		errorCh := make(chan error, 1002)
 		defer close(errorCh)
-		config, err := infra.LoadConfig(configFile.Name())
+		config, err := basic.LoadConfig(configFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
@@ -76,7 +77,7 @@ var _ = Describe("Initiator", func() {
 		defer close(raw)
 		errorCh := make(chan error, 1002)
 		defer close(errorCh)
-		config, err := infra.LoadConfig(configFile.Name())
+		config, err := basic.LoadConfig(configFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
@@ -93,7 +94,7 @@ var _ = Describe("Initiator", func() {
 		defer close(raw)
 		errorCh := make(chan error, 1002)
 		defer close(errorCh)
-		config, err := infra.LoadConfig(configFile.Name())
+		config, err := basic.LoadConfig(configFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())

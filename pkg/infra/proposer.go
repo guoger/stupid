@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"io"
+	"tape/pkg/infra/basic"
 
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/orderer"
@@ -17,10 +18,10 @@ type Proposers struct {
 	ctx       context.Context
 	signed    []chan *Elements
 	processed chan *Elements
-	config    Config
+	config    basic.Config
 }
 
-func CreateProposers(ctx context.Context, signed []chan *Elements, processed chan *Elements, config Config, logger *log.Logger) (*Proposers, error) {
+func CreateProposers(ctx context.Context, signed []chan *Elements, processed chan *Elements, config basic.Config, logger *log.Logger) (*Proposers, error) {
 	var ps [][]*Proposer
 	var err error
 	//one proposer per connection per peer
@@ -56,8 +57,8 @@ type Proposer struct {
 	logger *log.Logger
 }
 
-func CreateProposer(node Node, logger *log.Logger) (*Proposer, error) {
-	endorser, err := CreateEndorserClient(node, logger)
+func CreateProposer(node basic.Node, logger *log.Logger) (*Proposer, error) {
+	endorser, err := basic.CreateEndorserClient(node, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +104,7 @@ type Broadcaster struct {
 	logger *log.Logger
 }
 
-func CreateBroadcasters(ctx context.Context, envs chan *Elements, errorCh chan error, config Config, logger *log.Logger) (*Broadcasters, error) {
+func CreateBroadcasters(ctx context.Context, envs chan *Elements, errorCh chan error, config basic.Config, logger *log.Logger) (*Broadcasters, error) {
 	var workers []*Broadcaster
 	for i := 0; i < config.NumOfConn; i++ {
 		broadcaster, err := CreateBroadcaster(ctx, config.Orderer, logger)
@@ -128,8 +129,8 @@ func (bs Broadcasters) Start() {
 	}
 }
 
-func CreateBroadcaster(ctx context.Context, node Node, logger *log.Logger) (*Broadcaster, error) {
-	client, err := CreateBroadcastClient(ctx, node, logger)
+func CreateBroadcaster(ctx context.Context, node basic.Node, logger *log.Logger) (*Broadcaster, error) {
+	client, err := basic.CreateBroadcastClient(ctx, node, logger)
 	if err != nil {
 		return nil, err
 	}

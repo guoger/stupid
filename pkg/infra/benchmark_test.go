@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"tape/e2e/mock"
+	"tape/pkg/infra/basic"
 
 	"github.com/hyperledger/fabric-protos-go/peer"
 	log "github.com/sirupsen/logrus"
 )
 
 func StartProposer(ctx context.Context, signed, processed chan *Elements, logger *log.Logger, threshold int, addr string) {
-	peer := Node{
+	peer := basic.Node{
 		Addr: addr,
 	}
 	Proposer, _ := CreateProposer(peer, logger)

@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"tape/pkg/infra/basic"
 	"time"
 
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -23,7 +24,7 @@ type Observer struct {
 	logger  *log.Logger
 }
 
-func CreateObservers(ctx context.Context, crypto Crypto, errorCh chan error, blockCh chan *AddressedBlock, config Config, logger *log.Logger) (*Observers, error) {
+func CreateObservers(ctx context.Context, crypto Crypto, errorCh chan error, blockCh chan *AddressedBlock, config basic.Config, logger *log.Logger) (*Observers, error) {
 	var workers []*Observer
 	for i, node := range config.Committers {
 		worker, err := CreateObserver(ctx, config.Channel, node, crypto, logger)
@@ -47,13 +48,13 @@ func (o *Observers) Start() {
 	}
 }
 
-func CreateObserver(ctx context.Context, channel string, node Node, crypto Crypto, logger *log.Logger) (*Observer, error) {
+func CreateObserver(ctx context.Context, channel string, node basic.Node, crypto Crypto, logger *log.Logger) (*Observer, error) {
 	seek, err := CreateSignedDeliverNewestEnv(channel, crypto)
 	if err != nil {
 		return nil, err
 	}
 
-	deliverer, err := CreateDeliverFilteredClient(ctx, node, logger)
+	deliverer, err := basic.CreateDeliverFilteredClient(ctx, node, logger)
 	if err != nil {
 		return nil, err
 	}
