@@ -15,3 +15,13 @@ type Crypto interface {
 	Serialize() ([]byte, error)
 	Sign(message []byte) ([]byte, error)
 }
+
+/*
+type consmuer and producer interface
+as Tape major as Producer and Consumer pattern
+define an interface here as Worker with start here
+as for #56 and #174,in cli imp adjust sequence of P&C impl to control workflow.
+*/
+type Worker interface {
+	Start()
+}

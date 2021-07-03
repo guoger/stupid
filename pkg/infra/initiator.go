@@ -7,31 +7,41 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func StartCreateProposal(num int, burst int, r float64, config Config, crypto Crypto, raw chan *Elements, errorCh chan error) {
+type Initiator struct {
+	Num     int
+	Burst   int
+	R       float64
+	Config  Config
+	Crypto  Crypto
+	Raw     chan *Elements
+	ErrorCh chan error
+}
+
+func (initiator *Initiator) Start() {
 	limit := rate.Inf
 	ctx := context.Background()
-	if r > 0 {
-		limit = rate.Limit(r)
+	if initiator.R > 0 {
+		limit = rate.Limit(initiator.R)
 	}
-	limiter := rate.NewLimiter(limit, burst)
-	for i := 0; i < num; i++ {
+	limiter := rate.NewLimiter(limit, initiator.Burst)
+	for i := 0; i < initiator.Num; i++ {
 		prop, err := CreateProposal(
-			crypto,
-			config.Channel,
-			config.Chaincode,
-			config.Version,
-			config.Args...,
+			initiator.Crypto,
+			initiator.Config.Channel,
+			initiator.Config.Chaincode,
+			initiator.Config.Version,
+			initiator.Config.Args...,
 		)
 		if err != nil {
-			errorCh <- errors.Wrapf(err, "error creating proposal")
+			initiator.ErrorCh <- errors.Wrapf(err, "error creating proposal")
 			return
 		}
 
 		if err = limiter.Wait(ctx); err != nil {
-			errorCh <- errors.Wrapf(err, "error creating proposal")
+			initiator.ErrorCh <- errors.Wrapf(err, "error creating proposal")
 			return
 		}
 
-		raw <- &Elements{Proposal: prop}
+		initiator.Raw <- &Elements{Proposal: prop}
 	}
 }

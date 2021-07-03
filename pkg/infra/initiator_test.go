@@ -63,7 +63,8 @@ var _ = Describe("Initiator", func() {
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
 		t := time.Now()
-		infra.StartCreateProposal(1002, 10, 0, config, crypto, raw, errorCh)
+		Initiator := &infra.Initiator{1002, 10, 0, config, crypto, raw, errorCh}
+		Initiator.Start()
 		t1 := time.Now()
 		Expect(raw).To(HaveLen(1002))
 		Expect(t1.Sub(t)).To(BeNumerically("<", 2*time.Second))
@@ -80,7 +81,8 @@ var _ = Describe("Initiator", func() {
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
 		t := time.Now()
-		infra.StartCreateProposal(12, 10, 1, config, crypto, raw, errorCh)
+		Initiator := &infra.Initiator{12, 10, 1, config, crypto, raw, errorCh}
+		Initiator.Start()
 		t1 := time.Now()
 		Expect(raw).To(HaveLen(12))
 		Expect(t1.Sub(t)).To(BeNumerically(">", 2*time.Second))
@@ -96,7 +98,8 @@ var _ = Describe("Initiator", func() {
 		crypto, err := config.LoadCrypto()
 		Expect(err).NotTo(HaveOccurred())
 		t := time.Now()
-		infra.StartCreateProposal(12, 10, 10000, config, crypto, raw, errorCh)
+		Initiator := &infra.Initiator{12, 10, 0, config, crypto, raw, errorCh}
+		Initiator.Start()
 		t1 := time.Now()
 		Expect(raw).To(HaveLen(12))
 		Expect(t1.Sub(t)).To(BeNumerically("<", 2*time.Second))
