@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 	"testing"
-	"time"
 
 	"tape/e2e/mock"
 
@@ -58,10 +57,10 @@ func BenchmarkPeerEndorsement4(b *testing.B) { benchmarkNPeer(4, b) }
 func BenchmarkPeerEndorsement8(b *testing.B) { benchmarkNPeer(8, b) }
 
 func benchmarkAsyncCollector(concurrent int, b *testing.B) {
-	instance, _ := NewBlockCollector(concurrent, concurrent)
 	block := make(chan *AddressedBlock, 100)
 	done := make(chan struct{})
-	go instance.Start(context.Background(), block, done, b.N, time.Now(), false)
+	instance, _ := NewBlockCollector(concurrent, concurrent, context.Background(), block, done, b.N, false)
+	go instance.Start()
 
 	b.ReportAllocs()
 	b.ResetTimer()

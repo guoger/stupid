@@ -41,7 +41,6 @@ func (initiator *Initiator) Start() {
 			initiator.ErrorCh <- errors.Wrapf(err, "error creating proposal")
 			return
 		}
-
 		initiator.Raw <- &Elements{Proposal: prop}
 	}
 }

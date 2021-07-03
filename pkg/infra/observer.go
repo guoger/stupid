@@ -10,7 +10,10 @@ import (
 )
 
 type Observers struct {
-	workers []*Observer
+	workers   []*Observer
+	errorCh   chan error
+	blockCh   chan *AddressedBlock
+	StartTime time.Time
 }
 
 type Observer struct {
@@ -20,22 +23,27 @@ type Observer struct {
 	logger  *log.Logger
 }
 
-func CreateObservers(ctx context.Context, channel string, nodes []Node, crypto Crypto, logger *log.Logger) (*Observers, error) {
+func CreateObservers(ctx context.Context, crypto Crypto, errorCh chan error, blockCh chan *AddressedBlock, config Config, logger *log.Logger) (*Observers, error) {
 	var workers []*Observer
-	for i, node := range nodes {
-		worker, err := CreateObserver(ctx, channel, node, crypto, logger)
+	for i, node := range config.Committers {
+		worker, err := CreateObserver(ctx, config.Channel, node, crypto, logger)
 		if err != nil {
 			return nil, err
 		}
 		worker.index = i
 		workers = append(workers, worker)
 	}
-	return &Observers{workers: workers}, nil
+	return &Observers{
+		workers: workers,
+		errorCh: errorCh,
+		blockCh: blockCh,
+	}, nil
 }
 
-func (o *Observers) Start(errorCh chan error, blockCh chan<- *AddressedBlock, now time.Time) {
+func (o *Observers) Start() {
+	o.StartTime = time.Now()
 	for i := 0; i < len(o.workers); i++ {
-		go o.workers[i].Start(errorCh, blockCh, now)
+		go o.workers[i].Start(o.errorCh, o.blockCh, o.StartTime)
 	}
 }
 

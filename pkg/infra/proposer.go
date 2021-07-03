@@ -12,17 +12,21 @@ import (
 )
 
 type Proposers struct {
-	workers [][]*Proposer
-	logger  *log.Logger
+	workers   [][]*Proposer
+	logger    *log.Logger
+	ctx       context.Context
+	signed    []chan *Elements
+	processed chan *Elements
+	config    Config
 }
 
-func CreateProposers(conn int, nodes []Node, logger *log.Logger) (*Proposers, error) {
+func CreateProposers(ctx context.Context, signed []chan *Elements, processed chan *Elements, config Config, logger *log.Logger) (*Proposers, error) {
 	var ps [][]*Proposer
 	var err error
 	//one proposer per connection per peer
-	for _, node := range nodes {
-		row := make([]*Proposer, conn)
-		for j := 0; j < conn; j++ {
+	for _, node := range config.Endorsers {
+		row := make([]*Proposer, config.NumOfConn)
+		for j := 0; j < config.NumOfConn; j++ {
 			row[j], err = CreateProposer(node, logger)
 			if err != nil {
 				return nil, err
@@ -31,16 +35,16 @@ func CreateProposers(conn int, nodes []Node, logger *log.Logger) (*Proposers, er
 		ps = append(ps, row)
 	}
 
-	return &Proposers{workers: ps, logger: logger}, nil
+	return &Proposers{workers: ps, logger: logger, ctx: ctx, signed: signed, processed: processed, config: config}, nil
 }
 
-func (ps *Proposers) Start(ctx context.Context, signed []chan *Elements, processed chan *Elements, config Config) {
+func (ps *Proposers) Start() {
 	ps.logger.Infof("Start sending transactions.")
-	for i := 0; i < len(config.Endorsers); i++ {
+	for i := 0; i < len(ps.config.Endorsers); i++ {
 		// peer connection should be config.ClientPerConn * config.NumOfConn
-		for k := 0; k < config.ClientPerConn; k++ {
-			for j := 0; j < config.NumOfConn; j++ {
-				go ps.workers[i][j].Start(ctx, signed[i], processed, len(config.Endorsers))
+		for k := 0; k < ps.config.ClientPerConn; k++ {
+			for j := 0; j < ps.config.NumOfConn; j++ {
+				go ps.workers[i][j].Start(ps.ctx, ps.signed[i], ps.processed, len(ps.config.Endorsers))
 			}
 		}
 	}
@@ -87,31 +91,41 @@ func (p *Proposer) Start(ctx context.Context, signed, processed chan *Elements, 
 	}
 }
 
-type Broadcasters []*Broadcaster
-
-func CreateBroadcasters(ctx context.Context, conn int, orderer Node, logger *log.Logger) (Broadcasters, error) {
-	bs := make(Broadcasters, conn)
-	for i := 0; i < conn; i++ {
-		broadcaster, err := CreateBroadcaster(ctx, orderer, logger)
-		if err != nil {
-			return nil, err
-		}
-		bs[i] = broadcaster
-	}
-
-	return bs, nil
-}
-
-func (bs Broadcasters) Start(ctx context.Context, envs <-chan *Elements, errorCh chan error) {
-	for _, b := range bs {
-		go b.StartDraining(errorCh)
-		go b.Start(ctx, envs, errorCh)
-	}
+type Broadcasters struct {
+	workers []*Broadcaster
+	ctx     context.Context
+	envs    chan *Elements
+	errorCh chan error
 }
 
 type Broadcaster struct {
 	c      orderer.AtomicBroadcast_BroadcastClient
 	logger *log.Logger
+}
+
+func CreateBroadcasters(ctx context.Context, envs chan *Elements, errorCh chan error, config Config, logger *log.Logger) (*Broadcasters, error) {
+	var workers []*Broadcaster
+	for i := 0; i < config.NumOfConn; i++ {
+		broadcaster, err := CreateBroadcaster(ctx, config.Orderer, logger)
+		if err != nil {
+			return nil, err
+		}
+		workers = append(workers, broadcaster)
+	}
+
+	return &Broadcasters{
+		workers: workers,
+		ctx:     ctx,
+		envs:    envs,
+		errorCh: errorCh,
+	}, nil
+}
+
+func (bs Broadcasters) Start() {
+	for _, b := range bs.workers {
+		go b.StartDraining(bs.errorCh)
+		go b.Start(bs.ctx, bs.envs, bs.errorCh)
+	}
 }
 
 func CreateBroadcaster(ctx context.Context, node Node, logger *log.Logger) (*Broadcaster, error) {
