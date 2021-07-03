@@ -17,7 +17,7 @@ type Elements struct {
 }
 
 type Assembler struct {
-	Signer *Crypto
+	Signer Crypto
 }
 
 func (a *Assembler) assemble(e *Elements) (*Elements, error) {

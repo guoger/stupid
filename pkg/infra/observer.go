@@ -20,7 +20,7 @@ type Observer struct {
 	logger  *log.Logger
 }
 
-func CreateObservers(ctx context.Context, channel string, nodes []Node, crypto *Crypto, logger *log.Logger) (*Observers, error) {
+func CreateObservers(ctx context.Context, channel string, nodes []Node, crypto Crypto, logger *log.Logger) (*Observers, error) {
 	var workers []*Observer
 	for i, node := range nodes {
 		worker, err := CreateObserver(ctx, channel, node, crypto, logger)
@@ -39,7 +39,7 @@ func (o *Observers) Start(errorCh chan error, blockCh chan<- *AddressedBlock, no
 	}
 }
 
-func CreateObserver(ctx context.Context, channel string, node Node, crypto *Crypto, logger *log.Logger) (*Observer, error) {
+func CreateObserver(ctx context.Context, channel string, node Node, crypto Crypto, logger *log.Logger) (*Observer, error) {
 	seek, err := CreateSignedDeliverNewestEnv(channel, crypto)
 	if err != nil {
 		return nil, err

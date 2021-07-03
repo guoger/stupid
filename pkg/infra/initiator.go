@@ -7,7 +7,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func StartCreateProposal(num int, burst int, r float64, config Config, crypto *Crypto, raw chan *Elements, errorCh chan error) {
+func StartCreateProposal(num int, burst int, r float64, config Config, crypto Crypto, raw chan *Elements, errorCh chan error) {
 	limit := rate.Inf
 	ctx := context.Background()
 	if r > 0 {
