@@ -87,4 +87,4 @@ esac
 cd "$DIR"
 docker ps -a
 docker network ls
-docker run  -e TAPE_LOGLEVEL=debug --network $network -v $PWD:/config tape tape -c $CONFIG_FILE -n 500
+docker run  -e TAPE_LOGLEVEL=debug --network $network -v $PWD:/config tape tape -c $CONFIG_FILE -n 6974
